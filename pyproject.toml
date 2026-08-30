@@ -1,0 +1,11 @@
+[project]
+name = "arcron-oracle-watchdog"
+version = "0.1.0"
+description = "TestNet-only Arcron staleness watchdog. Schedule accounts; interested party pulls."
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+compile = ["puyapy"]

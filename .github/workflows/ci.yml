@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Guard create args, itob auth, baked keeper id
+        run: |
+          set -euo pipefail
+          f=smart_contracts/watchdog/contract.py
+          if grep -E 'def create\(self,.+\)' "$f"; then
+            echo "create() must take no arguments besides self" >&2
+            exit 1
+          fi
+          if grep -E 'itob\(' "$f"; then
+            echo "do not use itob for keeper auth; Application(keeper).address" >&2
+            exit 1
+          fi
+          if grep -E '769891898' "$f"; then
+            echo "do not bake the TestNet keeper app id into the contract" >&2
+            exit 1
+          fi
+      - name: Install puyapy
+        run: pip install puyapy
+      - name: Compile watchdog contract
+        run: puyapy smart_contracts/watchdog/contract.py --out-dir smart_contracts/artifacts/watchdog --resource-encoding value
