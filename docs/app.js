@@ -169,10 +169,27 @@ async function loadLocalnetProof() {
     const ln = await res.json();
     if (!ln || ln.network !== "localnet" || !(Number(ln.appId) > 0)) return;
     el.hidden = false;
-    el.textContent =
+    let line =
       "LocalNet proof · app " + ln.appId +
       " · " + (ln.genesisId || "dockernet") +
       " · not TestNet (see docs/localnet.json)";
+    try {
+      const lr = await fetch("./listen.json", { cache: "no-store" });
+      if (lr.ok) {
+        const listen = await lr.json();
+        if (listen && listen.network === "localnet" && Number(listen.appId) === Number(ln.appId)) {
+          const g = listen.global || {};
+          line +=
+            " · last_value " + (g.last_value ?? "—") +
+            " · watch_count " + (g.watch_count ?? 0) +
+            " · stale " + (g.stale ?? "—") +
+            " (see docs/listen.json)";
+        }
+      }
+    } catch (_) {
+      /* optional listen.json */
+    }
+    el.textContent = line;
   } catch (_) {
     /* optional file */
   }

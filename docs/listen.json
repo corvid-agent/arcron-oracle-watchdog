@@ -1,0 +1,63 @@
+{
+  "network": "localnet",
+  "genesisId": "dockernet-v1",
+  "algod": "http://localhost:4001",
+  "appId": 1038,
+  "appAddress": "OVLAY3NM3AXWK4DO6YO4PELT4U7MHSJP64NPL2GFAHWSHSPL2G65FZUYWI",
+  "mockKeeperAppId": 1039,
+  "mockKeeperCreateTxid": "KHY2VD2BXF4HWFUCMHJJ3JAXTWO2ML3V5LPH7AUKTBHE5362B5HQ",
+  "mockKeeperConfirmedRound": 31,
+  "mockKeeperFundTxid": "3Y7B3HH46PIGRXFVQNLDDGONWR4BIS32KVFC2PPBML5OSAOF6RAA",
+  "mockKeeperFundRound": 32,
+  "creator": "TOZ2LQRCEJH44IDHE2W35XGO2BUJROS2G62VI4BTFEUEUFCOGDHKENJSKI",
+  "lastRound": 36,
+  "listened_at": "2026-08-31T20:56:06.851831+00:00",
+  "calls": [
+    {
+      "method": "set_keeper",
+      "txid": "CIQWTNSYOAQBDSJWAOTPBKRYQ6VGUVZS4LIJ2NPG6FNALG4RYNGQ",
+      "round": 33,
+      "success": true,
+      "innerCount": 0,
+      "keeperAppId": 1039
+    },
+    {
+      "method": "set_max_age",
+      "txid": "MIOQ6N3LYIO6DHKUZ37CDFJICKOYSS7RAM2PIWX2Z5TORTAHPMXA",
+      "round": 34,
+      "success": true,
+      "innerCount": 0,
+      "maxAge": 1000
+    },
+    {
+      "method": "report",
+      "txid": "YNCQJAMMAUKH4XO7KYUZBDTZ7SI7GW3QQS6JK7TVVZDJCFF5O7LQ",
+      "round": 35,
+      "success": true,
+      "innerCount": 0,
+      "value": 42,
+      "hook": "report",
+      "via": "interested_party_pull"
+    },
+    {
+      "method": "watch",
+      "txid": "6Q73DIXO7EUU2BRDO2WRXBMAPP7JEKFLFEQ7LL6DX7IUV3WDVPGA",
+      "round": 36,
+      "success": true,
+      "innerCount": 1,
+      "targetAppId": 1038,
+      "hook": "watch",
+      "via": "mock_keeper.watch"
+    }
+  ],
+  "global": {
+    "last_value": 42,
+    "last_report_round": 35,
+    "stale": 0,
+    "watch_count": 1,
+    "last_watch_round": 36,
+    "keeper_app": 1039,
+    "max_age": 1000
+  },
+  "notes": "LocalNet-only listen proof. Do NOT copy this appId into docs/deploy.json or treat it as TestNet. TestNet stays appId 0 until a real TestNet create. Did not spend TestNet bank. Did not poke upkeep 81 or 87."
+}

@@ -35,6 +35,7 @@ DEPLOY_JSON = ROOT / "docs" / "deploy.json"
 ALGOD_URL = "http://localhost:4001"
 KMD_URL = "http://localhost:4002"
 TOKEN = "a" * 64
+BANK = "IFZZOTEBLLAV7DA4WP7IPZWZW67KXB5ZNYLZAWJ2S6M3KKNAX55BRXVK2Y"
 CREATE = Method.from_signature("create()void")
 CONTRACT_NAME = "Watchdog"
 SOURCE = "smart_contracts/watchdog/contract.py"
@@ -99,6 +100,8 @@ def funded_account(algod: AlgodClient, kmd: KMDClient) -> tuple[str, bytes]:
         best = None
         best_amt = -1
         for addr in keys:
+            if addr == BANK:
+                continue
             amt = int(algod.account_info(addr).get("amount") or 0)
             if amt > best_amt:
                 best = addr
@@ -156,6 +159,8 @@ def main() -> None:
     refuse_wrong_network(str(genesis_id) if genesis_id else None)
 
     addr, pk = funded_account(algod, kmd)
+    if addr == BANK:
+        sys.exit("refusing to sign as TestNet bank")
     info = algod.account_info(addr)
     print(f"deployer {addr} localnet_micro={info.get('amount')}", file=sys.stderr)
 

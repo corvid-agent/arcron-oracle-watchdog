@@ -33,12 +33,14 @@ TestNet only. Throwaway account, public TestNet dispenser. No mnemonic in this r
 7. Interested party calls `report(value)` in their own transaction. That is the outside reference. The keeper never carries it.
 8. Readers pull `last_value` / `stale` / `last_report_round` from global state in their own transactions.
 
-## LocalNet recreate (not TestNet)
+## LocalNet recreate + listen (not TestNet)
 
-Create, `set_keeper(Application(...))`, and a mock-keeper inner-call of `watch()` were proven on AlgoKit LocalNet (`dockernet-v1`). That is **not** TestNet. Do **not** copy any LocalNet app id into `docs/deploy.json` or Pages. `appId` stays 0 until a real TestNet create.
+Create, `set_keeper(Application(...))`, `set_max_age`, an interested-party `report(value)`, and a mock-keeper inner-call of `watch()` were proven on AlgoKit LocalNet (`dockernet-v1`). That is **not** TestNet. Do **not** copy any LocalNet app id into `docs/deploy.json` or treat it as TestNet. TestNet `appId` stays 0 until a real TestNet create.
 
-LocalNet ids are ephemeral (DevMode / reset). They are not a product and they are not for GitHub Pages.
-LocalNet proof for Pages lives in `docs/localnet.json` (CRT shows it when present). `docs/deploy.json` stays honest TestNet `appId: 0`.
+This pass (2026-08-31 ~2:56 PM MT): `python scripts/localnet_recreate.py` created Watchdog **appId 1038** at confirmed round **30** (`createTxid` in `docs/localnet.json`). Then `python scripts/localnet_listen.py` created mock keeper **1039**, set_keeper, set_max_age(1000), interested-party `report(42)`, and inner-called `watch` (1 inner). Global after listen: last_value=42, stale=0, watch_count=1, last_watch_round=36. LocalNet last-round after listen: 36. Did not spend the TestNet bank. Did not poke upkeep 81 or 87.
+
+LocalNet ids are ephemeral (DevMode / reset). They are not a product. They are not TestNet explorer links.
+LocalNet proof for Pages lives in `docs/localnet.json` and `docs/listen.json` (CRT shows them when present). `docs/deploy.json` stays honest TestNet `appId: 0`.
 
 ```bash
 # Docker daemon required
@@ -48,11 +50,13 @@ algokit localnet start
 pip install puyapy py-algorand-sdk
 python scripts/localnet_recreate.py
 # writes docs/localnet.json with network:"localnet" and the new appId
+python scripts/localnet_listen.py
+# set_keeper + set_max_age + report(42) + mock watch; writes docs/listen.json
 ```
 
-The script talks only to `localhost:4001` / `4002`, signs with the LocalNet KMD
-`unencrypted-default-wallet` (never prints a mnemonic), refuses TestNet/MainNet
-genesis ids, and never modifies `docs/deploy.json`.
+Both scripts talk only to `localhost:4001` / `4002`, sign with the LocalNet KMD
+`unencrypted-default-wallet` (never print a mnemonic), refuse TestNet/MainNet
+genesis ids, refuse signing as the TestNet bank, and never modify `docs/deploy.json`.
 
 DevMode holds last-round at 0 until the first tx. A successful create is a confirmed
 `application-index` on genesis id `dockernet-v1`, not a TestNet explorer link.
@@ -72,7 +76,7 @@ Not measured here (no confirmed TestNet deploy). Arcron's own figures, from `doc
 
 - No TestNet create, no upkeep, no execute. Dispenser captcha/401. appId stays 0.
 - Pages board is a stub until `docs/deploy.json` `appId` is flipped after a real create.
-- CI is compile + static hook tests, not a LocalNet execute.
+- CI is compile + static hook/honesty tests. LocalNet recreate/listen (set_keeper, set_max_age, report, mock watch) are proven on the box against localhost:4001; they are not TestNet.
 - The hook cannot fetch an off-chain price. That is the point: the keeper supplies no data. If `report` never runs, `watch` marks stale and returns.
 - TestNet keeper 769891898 may be late. Interval floor 30 so ordinary lateness is not treated as a signal.
 
