@@ -33,6 +33,20 @@ TestNet only. Throwaway account, public TestNet dispenser. No mnemonic in this r
 7. Interested party calls `report(value)` in their own transaction. That is the outside reference. The keeper never carries it.
 8. Readers pull `last_value` / `stale` / `last_report_round` from global state in their own transactions.
 
+## LocalNet recreate (not TestNet)
+
+Create, `set_keeper(Application(...))`, and a mock-keeper inner-call of `watch()` were proven on AlgoKit LocalNet (`dockernet-v1`). That is **not** TestNet. Do **not** copy any LocalNet app id into `docs/deploy.json` or Pages. `appId` stays 0 until a real TestNet create.
+
+```bash
+algokit localnet start
+# algod http://localhost:4001
+# create with ZERO constructor args — do not pass 769891898
+# set_keeper(Application(<local keeper>))  # Application, never itob(keeper id)
+# inner-call watch() from the keeper app account
+```
+
+LocalNet ids are ephemeral (DevMode / reset). They are not a product and they are not for GitHub Pages.
+
 ## Measured cost
 
 Not measured here (no confirmed TestNet deploy). Arcron's own figures, from `docs/integrating.md` in CorvidLabs/arcron, not this demo:
