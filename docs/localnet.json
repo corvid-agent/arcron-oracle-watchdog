@@ -1,0 +1,16 @@
+{
+  "network": "localnet",
+  "genesisId": "dockernet-v1",
+  "algod": "http://localhost:4001",
+  "appId": 1021,
+  "appAddress": "FJCYQ5FG7XNJ3SLKIXQKLMOK2IGPIQATZLPYQ2VJDSIYG435C25VVWWRXA",
+  "createTxid": "5Y4DX233LH75YYAIHTHPXZRPAEMVNHOWMUBFPEIWO3HWIFWPE2PQ",
+  "confirmedRound": 16,
+  "creator": "TOZ2LQRCEJH44IDHE2W35XGO2BUJROS2G62VI4BTFEUEUFCOGDHKENJSKI",
+  "contract": "Watchdog",
+  "source": "smart_contracts/watchdog/contract.py",
+  "extraPages": 0,
+  "approvalBytes": 452,
+  "created_at": "2026-08-31T15:23:51.218766+00:00",
+  "notes": "LocalNet-only recreate proof. Do NOT copy this appId into docs/deploy.json or treat it as TestNet. TestNet stays appId 0 until a real TestNet create. Did not spend TestNet bank. Did not poke upkeep 81 or 87."
+}
