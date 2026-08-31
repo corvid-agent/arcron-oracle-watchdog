@@ -2,6 +2,11 @@
 
 TestNet Arcron watchdog that accounts staleness on a schedule while the interested party pulls the outside reference in their own transaction.
 
+## The keeper supplies no oracle data
+
+The keeper supplies no oracle data. Arcron `execute` inner-calls `watch()` with the method selector only: no price, no feed, no bytes from the keeper. `watch` only accounts whether the last `report` is older than `max_age`. The interested party brings the outside reference in their own `report(value)` transaction. Readers pull global state in theirs.
+
+
 ## Live proof
 
 **not done** — this commit ships the compiling contract, CI, and Pages stub. Live TestNet create / register / execute were not confirmed (dispenser captcha/401), so ids are zeros. Never invent txids.
@@ -42,7 +47,7 @@ Not measured here (no confirmed TestNet deploy). Arcron's own figures, from `doc
 
 - No TestNet create, no upkeep, no execute. Dispenser captcha/401. appId stays 0.
 - Pages board is a stub until `docs/deploy.json` `appId` is flipped after a real create.
-- CI is compile + grep guards, not a LocalNet execute.
+- CI is compile + static hook tests, not a LocalNet execute.
 - The hook cannot fetch an off-chain price. That is the point: the keeper supplies no data. If `report` never runs, `watch` marks stale and returns.
 - TestNet keeper 769891898 may be late. Interval floor 30 so ordinary lateness is not treated as a signal.
 

@@ -9,3 +9,7 @@ dependencies = []
 
 [project.optional-dependencies]
 compile = ["puyapy"]
+dev = ["pytest>=8.0.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
