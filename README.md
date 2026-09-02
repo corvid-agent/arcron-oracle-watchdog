@@ -37,7 +37,7 @@ TestNet only. Throwaway account, public TestNet dispenser. No mnemonic in this r
 
 Create, `set_keeper(Application(...))`, `set_max_age`, an interested-party `report(value)`, and a mock-keeper inner-call of `watch()` were proven on AlgoKit LocalNet (`dockernet-v1`). That is **not** TestNet. Do **not** copy any LocalNet app id into `docs/deploy.json` or treat it as TestNet. TestNet `appId` stays 0 until a real TestNet create.
 
-This pass (2026-09-01 ~10:01 AM MT): `python scripts/localnet_recreate.py` created Watchdog **appId 1071** at confirmed round **56** (`createTxid` in `docs/localnet.json`). Then `python scripts/localnet_listen.py` created mock keeper **1072**, set_keeper, set_max_age(1000), interested-party `report(42)`, and inner-called `watch` (1 inner). Global after listen: last_value=42, stale=0, watch_count=1, last_watch_round=62. LocalNet last-round after listen: 62. Did not spend the TestNet bank. Did not poke upkeep 81 or 87.
+This pass (2026-09-02 ~8:48 AM MT): `python scripts/localnet_recreate.py` created Watchdog **appId 1131** at confirmed round **104** (`createTxid` in `docs/localnet.json`). Then `python scripts/localnet_listen.py` created mock keeper **1132**, set_keeper, set_max_age(1000), interested-party `report(42)`, and inner-called `watch` (1 inner). Global after listen: last_value=42, stale=0, watch_count=1, last_watch_round=110. LocalNet last-round after listen: 110. Did not spend the TestNet bank. Did not poke upkeep 81 or 87.
 
 LocalNet ids are ephemeral (DevMode / reset). They are not a product. They are not TestNet explorer links.
 LocalNet proof for Pages lives in `docs/localnet.json` and `docs/listen.json` (CRT shows them when present). `docs/deploy.json` stays honest TestNet `appId: 0`.
