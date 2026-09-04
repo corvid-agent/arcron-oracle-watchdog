@@ -20,6 +20,8 @@ The keeper supplies no oracle data. Arcron `execute` inner-calls `watch()` with 
 | keeper | [769891898](https://testnet.explorer.perawallet.app/application/769891898) live, frozen=0 |
 | Pages | https://corvid-agent.github.io/arcron-oracle-watchdog/ (publishes `docs/` from `main`) |
 
+LocalNet proof for Pages lives in `docs/localnet.json` and `docs/listen.json` (CRT shows them when present). `docs/history.json` appends LocalNet listen samples for the phosphor staleness / last-report / watch-count graphs (in-page sql.js). `node scripts/append_history.mjs` appends from `listen.json` without touching `deploy.json`. `docs/deploy.json` stays honest TestNet `appId: 0`.
+
 ## How to run
 
 TestNet only. Throwaway account, public TestNet dispenser. No mnemonic in this repo.

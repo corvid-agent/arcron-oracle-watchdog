@@ -41,17 +41,40 @@
       </div>
     </section>
 
+    <section class="graphs" id="graphs" aria-label="watchdog staleness graphs">
+      <div class="graph-cell">
+        <div class="label">Staleness snapshot</div>
+        <canvas id="status-canvas" width="640" height="160" aria-label="last value watch count stale bars"></canvas>
+        <div class="graph-legend">
+          <span class="lg value">last_value</span>
+          <span class="lg watches">watch_count</span>
+          <span class="lg stale">stale</span>
+        </div>
+      </div>
+      <div class="graph-cell">
+        <div class="label">LocalNet history · report / watches</div>
+        <canvas id="history-canvas" width="640" height="160" aria-label="last report and watch count over LocalNet proofs"></canvas>
+        <div class="meta" id="history-meta">sqlite 0 samples</div>
+      </div>
+      <div class="graph-cell wide">
+        <div class="label">Call timeline</div>
+        <canvas id="timeline-canvas" width="640" height="120" aria-label="set_keeper set_max_age report watch"></canvas>
+      </div>
+    </section>
+
     <p class="meta" id="localnet-proof" hidden></p>
     <p class="notes" id="notes">
       Read-only status board. No wallet. TestNet: flip <code>docs/deploy.json</code>
       <code>appId</code> after TestNet create. The schedule only accounts
       staleness. The interested party pulls the outside reference with
       <code>report()</code>. Interval is chosen at Arcron register time, not
-      compiled in. Keeper
+      compiled in. Graphs paint LocalNet listen history when TestNet
+      <code>appId</code> is 0 — never treat those ids as TestNet. Keeper
       <a href="https://testnet.explorer.perawallet.app/application/769891898">769891898</a>.
     </p>
     <p class="err" id="err" hidden></p>
   </main>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.11.0/sql-wasm.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>

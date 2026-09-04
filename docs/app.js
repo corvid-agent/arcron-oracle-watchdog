@@ -1,5 +1,10 @@
 const INDEXER = "https://testnet-idx.algonode.cloud";
 const KEEPER = 769891898;
+const PHOS = "#7cff6b";
+const DIM = "#3a8a32";
+const AMBER = "#e6c15a";
+const RED = "#ff5a4a";
+const DEAD = "#143318";
 
 function flaps(el, text, width) {
   const s = String(text).padStart(width, " ").slice(-width);
@@ -159,15 +164,241 @@ async function loadConfig() {
   return res.json();
 }
 
+function sizeCanvas(c) {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = c.getBoundingClientRect();
+  const w = Math.max(280, Math.floor(rect.width || c.width || 640));
+  const h = Math.max(100, Math.floor((c.height / (c.width || 640)) * w));
+  c.width = Math.floor(w * dpr);
+  c.height = Math.floor(h * dpr);
+  const ctx = c.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w, h };
+}
+
+function drawStatusBars(lastValue, watchCount, stale) {
+  const c = document.getElementById("status-canvas");
+  if (!c) return;
+  const { ctx, w, h } = sizeCanvas(c);
+  ctx.clearRect(0, 0, w, h);
+  const vals = [
+    { label: "last_value", v: Number(lastValue || 0), color: PHOS },
+    { label: "watch_count", v: Number(watchCount || 0), color: AMBER },
+    { label: "stale", v: Number(stale || 0), color: Number(stale || 0) ? RED : DIM },
+  ];
+  const max = Math.max(...vals.map((x) => x.v), 1);
+  const barH = Math.min(28, (h - 36) / vals.length - 8);
+  vals.forEach((row, i) => {
+    const y = 18 + i * (barH + 14);
+    const bw = Math.max(2, (row.v / max) * (w - 130));
+    ctx.fillStyle = DEAD;
+    ctx.fillRect(110, y, w - 130, barH);
+    ctx.fillStyle = row.color;
+    ctx.shadowColor = row.color;
+    ctx.shadowBlur = 8;
+    ctx.fillRect(110, y, bw, barH);
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = DIM;
+    ctx.font = "11px IBM Plex Mono, monospace";
+    ctx.fillText(row.label, 4, y + barH - 6);
+    ctx.fillStyle = PHOS;
+    ctx.fillText(String(row.v), 114, y + barH - 6);
+  });
+}
+
+function drawHistoryLine(rows) {
+  const c = document.getElementById("history-canvas");
+  const meta = document.getElementById("history-meta");
+  if (!c) return;
+  const { ctx, w, h } = sizeCanvas(c);
+  ctx.clearRect(0, 0, w, h);
+  if (meta) meta.textContent = "sqlite " + rows.length + " samples · LocalNet only";
+  if (!rows.length) {
+    ctx.fillStyle = DIM;
+    ctx.font = "12px IBM Plex Mono, monospace";
+    ctx.fillText("no history yet", 12, 28);
+    return;
+  }
+  const values = rows.map((r) => Number(r.last_value || 0));
+  const watches = rows.map((r) => Number(r.watch_count || 0));
+  const reports = rows.map((r) => Number(r.last_report_round || 0));
+  const max = Math.max(...values, ...watches, ...reports, 1);
+  const pad = 16;
+  function series(vals, color, fill) {
+    ctx.beginPath();
+    vals.forEach((v, i) => {
+      const px = pad + (i * (w - pad * 2)) / Math.max(1, vals.length - 1);
+      const py = h - pad - (v / max) * (h - pad * 2);
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    });
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 6;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    if (fill) {
+      const lastX = pad + ((vals.length - 1) * (w - pad * 2)) / Math.max(1, vals.length - 1);
+      ctx.lineTo(lastX, h - pad);
+      ctx.lineTo(pad, h - pad);
+      ctx.closePath();
+      ctx.fillStyle = fill;
+      ctx.fill();
+    }
+  }
+  series(reports, AMBER, "rgba(230,193,90,0.08)");
+  series(values, PHOS, null);
+  series(watches, DIM, null);
+  ctx.fillStyle = DIM;
+  ctx.font = "10px IBM Plex Mono, monospace";
+  rows.forEach((r, i) => {
+    const px = pad + (i * (w - pad * 2)) / Math.max(1, rows.length - 1);
+    ctx.fillText(String(r.appId || ""), px - 10, h - 2);
+    if (Number(r.stale || 0) === 1) {
+      const py = h - pad - (Number(r.last_value || 0) / max) * (h - pad * 2);
+      ctx.fillStyle = RED;
+      ctx.beginPath();
+      ctx.arc(px, py, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = DIM;
+    }
+  });
+}
+
+function drawTimeline(calls) {
+  const c = document.getElementById("timeline-canvas");
+  if (!c) return;
+  const { ctx, w, h } = sizeCanvas(c);
+  ctx.clearRect(0, 0, w, h);
+  const steps = Array.isArray(calls) && calls.length
+    ? calls.map((x) => ({ method: x.method || "?", round: x.round, ok: !!x.success }))
+    : [
+        { method: "set_keeper", ok: false },
+        { method: "set_max_age", ok: false },
+        { method: "report", ok: false },
+        { method: "watch", ok: false },
+      ];
+  const n = steps.length;
+  const y = h / 2;
+  ctx.strokeStyle = DEAD;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(24, y);
+  ctx.lineTo(w - 24, y);
+  ctx.stroke();
+  steps.forEach((s, i) => {
+    const px = 24 + (i * (w - 48)) / Math.max(1, n - 1);
+    ctx.beginPath();
+    ctx.arc(px, y, s.ok ? 7 : 5, 0, Math.PI * 2);
+    ctx.fillStyle = s.ok ? PHOS : DEAD;
+    ctx.shadowColor = s.ok ? PHOS : "transparent";
+    ctx.shadowBlur = s.ok ? 10 : 0;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = s.ok ? PHOS : DIM;
+    ctx.font = "10px IBM Plex Mono, monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(s.method, px, y - 14);
+    if (s.round != null) ctx.fillText("r" + s.round, px, y + 22);
+  });
+  ctx.textAlign = "left";
+}
+
+let sqlDb = null;
+
+async function bootSql(rows) {
+  if (typeof initSqlJs !== "function") return rows;
+  const SQL = await initSqlJs({
+    locateFile: (f) => "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.11.0/" + f,
+  });
+  sqlDb = new SQL.Database();
+  sqlDb.run(
+    "CREATE TABLE samples (t TEXT, network TEXT, appId INTEGER, mockKeeperAppId INTEGER, lastRound INTEGER, last_value INTEGER, last_report_round INTEGER, stale INTEGER, watch_count INTEGER, last_watch_round INTEGER, max_age INTEGER, calls INTEGER, source TEXT);"
+  );
+  const ins = sqlDb.prepare(
+    "INSERT INTO samples VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
+  );
+  rows.forEach((r) => {
+    ins.run([
+      r.t || "",
+      r.network || "localnet",
+      Number(r.appId || 0),
+      Number(r.mockKeeperAppId || 0),
+      Number(r.lastRound || 0),
+      Number(r.last_value || 0),
+      Number(r.last_report_round || 0),
+      Number(r.stale || 0),
+      Number(r.watch_count || 0),
+      Number(r.last_watch_round || 0),
+      Number(r.max_age || 0),
+      Number(r.calls || 0),
+      r.source || "",
+    ]);
+  });
+  ins.free();
+  const res = sqlDb.exec(
+    "SELECT t, network, appId, mockKeeperAppId, lastRound, last_value, last_report_round, stale, watch_count, last_watch_round, max_age, calls, source FROM samples WHERE network='localnet' ORDER BY lastRound, appId"
+  );
+  if (!res[0]) return rows;
+  return res[0].values.map((v) => ({
+    t: v[0],
+    network: v[1],
+    appId: v[2],
+    mockKeeperAppId: v[3],
+    lastRound: v[4],
+    last_value: v[5],
+    last_report_round: v[6],
+    stale: v[7],
+    watch_count: v[8],
+    last_watch_round: v[9],
+    max_age: v[10],
+    calls: v[11],
+    source: v[12],
+  }));
+}
+
+async function loadHistoryGraphs(listen) {
+  let history = [];
+  try {
+    const res = await fetch("./history.json", { cache: "no-store" });
+    if (res.ok) history = await res.json();
+  } catch (_) {
+    history = [];
+  }
+  if (!Array.isArray(history)) history = [];
+  // Only LocalNet rows — never paint TestNet-looking ids from history.
+  history = history.filter((r) => r && r.network === "localnet" && Number(r.appId) > 0);
+  let rows = history;
+  try {
+    rows = await bootSql(history);
+  } catch (_) {
+    rows = history;
+  }
+  const g = (listen && listen.global) || {};
+  const last = rows[rows.length - 1] || {};
+  const lastValue = Number(g.last_value != null ? g.last_value : last.last_value || 0);
+  const watchCount = Number(g.watch_count != null ? g.watch_count : last.watch_count || 0);
+  const stale = Number(g.stale != null ? g.stale : last.stale || 0);
+  drawStatusBars(lastValue, watchCount, stale);
+  drawHistoryLine(rows);
+  drawTimeline(listen && Array.isArray(listen.calls) ? listen.calls : []);
+}
 
 async function loadLocalnetProof() {
   const el = document.getElementById("localnet-proof");
-  if (!el) return;
+  if (!el) return null;
+  let listen = null;
   try {
     const res = await fetch("./localnet.json", { cache: "no-store" });
-    if (!res.ok) return;
+    if (!res.ok) {
+      await loadHistoryGraphs(null);
+      return null;
+    }
     const ln = await res.json();
-    if (!ln || ln.network !== "localnet" || !(Number(ln.appId) > 0)) return;
+    if (!ln || ln.network !== "localnet" || !(Number(ln.appId) > 0)) {
+      await loadHistoryGraphs(null);
+      return null;
+    }
     el.hidden = false;
     let line =
       "LocalNet proof · app " + ln.appId +
@@ -176,9 +407,18 @@ async function loadLocalnetProof() {
     try {
       const lr = await fetch("./listen.json", { cache: "no-store" });
       if (lr.ok) {
-        const listen = await lr.json();
+        listen = await lr.json();
         if (listen && listen.network === "localnet" && Number(listen.appId) === Number(ln.appId)) {
           const g = listen.global || {};
+          flaps(document.getElementById("last-value"), String(g.last_value ?? 0), 12);
+          flaps(document.getElementById("last-report"), String(g.last_report_round ?? 0), 10);
+          flaps(document.getElementById("watch-count"), String(g.watch_count ?? 0), 8);
+          flaps(document.getElementById("last-watch"), String(g.last_watch_round ?? 0), 10);
+          if (Number(g.stale || 0) === 1) {
+            paint("STALE (LocalNet)", "late", "WATCHDOG — STALE LocalNet");
+          } else if (g.last_report_round) {
+            paint("FRESH (LocalNet)", "live", "WATCHDOG — FRESH LocalNet");
+          }
           line +=
             " · mockKeeper " + (listen.mockKeeperAppId ?? "—") +
             " · last_value " + (g.last_value ?? "—") +
@@ -192,8 +432,11 @@ async function loadLocalnetProof() {
       /* optional listen.json */
     }
     el.textContent = line;
+    await loadHistoryGraphs(listen);
+    return listen;
   } catch (_) {
-    /* optional file */
+    await loadHistoryGraphs(null);
+    return null;
   }
 }
 
@@ -202,6 +445,9 @@ async function main() {
   flaps(document.getElementById("last-report"), "0", 10);
   flaps(document.getElementById("watch-count"), "0", 8);
   flaps(document.getElementById("last-watch"), "0", 10);
+  drawStatusBars(0, 0, 0);
+  drawHistoryLine([]);
+  drawTimeline([]);
 
   let cfg;
   try {
@@ -209,12 +455,12 @@ async function main() {
   } catch (e) {
     document.getElementById("err").hidden = false;
     document.getElementById("err").textContent = "Could not read deploy.json";
+    await loadHistoryGraphs(null);
     return;
   }
 
   const appId = Number(cfg.appId) || 0;
   const keeper = Number(cfg.keeperAppId) || KEEPER;
-  const headline = document.getElementById("headline");
   const subhead = document.getElementById("subhead");
 
   if (appId <= 0) {
@@ -239,6 +485,9 @@ async function main() {
     flaps(document.getElementById("last-report"), lastReport == null ? "—" : String(lastReport), 10);
     flaps(document.getElementById("watch-count"), watchCount == null ? "—" : String(watchCount), 8);
     flaps(document.getElementById("last-watch"), lastWatch == null ? "—" : String(lastWatch), 10);
+    drawStatusBars(lastValue || 0, watchCount || 0, stale || 0);
+    drawTimeline([]);
+    await loadHistoryGraphs(null);
     if (stale === 1) {
       paint("STALE", "late", "WATCHDOG — STALE");
     } else if (lastReport) {
@@ -250,6 +499,7 @@ async function main() {
     paint("GROUNDED", "grounded", "WATCHDOG — GROUNDED");
     document.getElementById("err").hidden = false;
     document.getElementById("err").textContent = "Indexer unreachable; appId is set but state was not read.";
+    await loadHistoryGraphs(null);
   }
 }
 

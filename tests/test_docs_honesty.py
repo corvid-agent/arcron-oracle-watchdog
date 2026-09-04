@@ -95,3 +95,44 @@ def test_mock_keeper_is_localnet_only_source() -> None:
     assert "Not for TestNet" in src
     assert "def watch(self, app: Application)" in src
     assert "arc4_signature(\"watch()uint64\")" in src
+
+
+def test_history_json_is_localnet_only() -> None:
+    history_path = ROOT / "docs" / "history.json"
+    assert history_path.is_file()
+    history = json.loads(history_path.read_text())
+    assert isinstance(history, list)
+    assert len(history) >= 1
+    for row in history:
+        assert row.get("network") == "localnet"
+        assert int(row.get("appId") or 0) > 0
+        assert str(row.get("appId")) not in json.dumps(DEPLOY)
+        genesis = str(row.get("genesisId") or "").lower()
+        assert "testnet" not in genesis
+        assert "mainnet" not in genesis
+        assert "last_report_round" in row
+        assert "stale" in row
+        assert "watch_count" in row
+
+
+def test_pages_draws_staleness_graphs_from_history() -> None:
+    assert "drawStatusBars" in APP_JS
+    assert "drawHistoryLine" in APP_JS
+    assert "bootSql" in APP_JS
+    assert "./history.json" in APP_JS
+    assert 'network === "localnet"' in APP_JS or "network='localnet'" in APP_JS
+    html = (ROOT / "docs" / "index.html").read_text()
+    assert "status-canvas" in html
+    assert "history-canvas" in html
+    assert "timeline-canvas" in html
+    assert "sql-wasm.js" in html
+    assert "1.11.0" in html
+
+
+def test_append_history_never_writes_deploy_json() -> None:
+    src = (ROOT / "scripts" / "append_history.mjs").read_text()
+    assert "Never writes docs/deploy.json" in src
+    assert "deploy.json" in src
+    assert "writeFileSync(deployPath" not in src
+    assert "historyPath" in src
+    assert "last_report_round" in src

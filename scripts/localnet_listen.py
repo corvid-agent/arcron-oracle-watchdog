@@ -372,6 +372,15 @@ def main() -> None:
     )
     del pk
 
+    # Append LocalNet sample to docs/history.json for CRT/sql.js graphs.
+    # Never writes docs/deploy.json.
+    try:
+        append = ROOT / "scripts" / "append_history.mjs"
+        if append.is_file():
+            subprocess.run(["node", str(append)], check=False)
+    except Exception as exc:  # pragma: no cover - best-effort
+        print(f"append_history skipped: {exc}", file=sys.stderr)
+
 
 if __name__ == "__main__":
     main()
