@@ -180,9 +180,11 @@ async function loadLocalnetProof() {
         if (listen && listen.network === "localnet" && Number(listen.appId) === Number(ln.appId)) {
           const g = listen.global || {};
           line +=
+            " · mockKeeper " + (listen.mockKeeperAppId ?? "—") +
             " · last_value " + (g.last_value ?? "—") +
             " · watch_count " + (g.watch_count ?? 0) +
             " · stale " + (g.stale ?? "—") +
+            " · last_watch " + (g.last_watch_round ?? "—") +
             " (see docs/listen.json)";
         }
       }

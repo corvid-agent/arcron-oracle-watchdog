@@ -16,7 +16,7 @@ LISTEN = json.loads((ROOT / "docs" / "listen.json").read_text())
 
 BANK = "IFZZOTEBLLAV7DA4WP7IPZWZW67KXB5ZNYLZAWJ2S6M3KKNAX55BRXVK2Y"
 # Ephemeral LocalNet ids from older proofs must never leak into deploy.json.
-FORBIDDEN_LOCALNET_COPY = {1001, 1002, 1003, 1004, 1005, 1110, 1131, 1170, 1171}
+FORBIDDEN_LOCALNET_COPY = {1001, 1002, 1003, 1004, 1005, 1110, 1131, 1170, 1171, 1202, 1203, 1257, 1258}
 
 
 def test_deploy_json_never_holds_localnet_ids() -> None:
@@ -181,3 +181,16 @@ def test_readme_localnet_proof_matches_json() -> None:
     # Live TestNet table stays honest zeros.
     assert "appId 0" in README or "appId stays 0" in README
     assert "**not done**" in README
+
+
+def test_go_localnet_proof_cli_exists() -> None:
+    """Offline Go CLI reads localnet/listen JSON; asserts deploy appId stays 0."""
+    main = ROOT / "cmd" / "localnet-proof" / "main.go"
+    assert main.is_file()
+    body = main.read_text()
+    assert "deploy.json" in body
+    assert "appId" in body
+    assert "no mnemonic" in body.lower() or "No mnemonic" in body
+    assert "no algod" in body.lower() or "no network" in body.lower()
+    assert (ROOT / "go.mod").is_file()
+    assert "github.com/corvid-agent/arcron-oracle-watchdog" in (ROOT / "go.mod").read_text()

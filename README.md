@@ -37,7 +37,7 @@ TestNet only. Throwaway account, public TestNet dispenser. No mnemonic in this r
 
 Create, `set_keeper(Application(...))`, `set_max_age`, an interested-party `report(value)`, and a mock-keeper inner-call of `watch()` were proven on AlgoKit LocalNet (`dockernet-v1`). That is **not** TestNet. Do **not** copy any LocalNet app id into `docs/deploy.json` or treat it as TestNet. TestNet `appId` stays 0 until a real TestNet create.
 
-This pass (2026-09-03 ~7:17 PM MT): `python scripts/localnet_recreate.py` created Watchdog **appId 1257** at confirmed round **204** (`createTxid` in `docs/localnet.json`). Then `python scripts/localnet_listen.py` created mock keeper **1258**, set_keeper, set_max_age(1000), interested-party `report(42)`, and inner-called `watch` (1 inner). Global after listen: last_value=42, stale=0, watch_count=1, last_watch_round=210. LocalNet last-round after listen: 210. Did not spend the TestNet bank. Did not poke upkeep 81 or 87.
+This pass (2026-09-04 midday MT): `python scripts/localnet_recreate.py` created Watchdog **appId 1025** at confirmed round **19** (`createTxid` in `docs/localnet.json`). Then `python scripts/localnet_listen.py` created mock keeper **1026**, set_keeper, set_max_age(1000), interested-party `report(42)`, and inner-called `watch` (1 inner). Global after listen: last_value=42, stale=0, watch_count=1, last_watch_round=25. LocalNet last-round after listen: 25. Did not spend the TestNet bank. Did not poke upkeep 81 or 87. LocalNet was reset (last-round ~18); prior appIds 1257/1258 are gone.
 
 LocalNet ids are ephemeral (DevMode / reset). They are not a product. They are not TestNet explorer links.
 LocalNet proof for Pages lives in `docs/localnet.json` and `docs/listen.json` (CRT shows them when present). `docs/deploy.json` stays honest TestNet `appId: 0`.
@@ -57,6 +57,9 @@ python scripts/localnet_listen.py
 Both scripts talk only to `localhost:4001` / `4002`, sign with the LocalNet KMD
 `unencrypted-default-wallet` (never print a mnemonic), refuse TestNet/MainNet
 genesis ids, refuse signing as the TestNet bank, and never modify `docs/deploy.json`.
+
+Optional offline check (no algod, no mnemonic): `go run ./cmd/localnet-proof` reads
+`docs/localnet.json` + `docs/listen.json` and asserts `docs/deploy.json` still has `appId` 0.
 
 DevMode holds last-round at 0 until the first tx. A successful create is a confirmed
 `application-index` on genesis id `dockernet-v1`, not a TestNet explorer link.
