@@ -238,5 +238,21 @@
     "max_age": 1000,
     "calls": 4,
     "source": "docs/listen.json"
+  },
+  {
+    "t": "2026-09-11T15:11:17.104949+00:00",
+    "network": "localnet",
+    "genesisId": "dockernet-v1",
+    "appId": 1053,
+    "mockKeeperAppId": 1054,
+    "lastRound": 48,
+    "last_value": 42,
+    "last_report_round": 47,
+    "stale": 0,
+    "watch_count": 1,
+    "last_watch_round": 48,
+    "max_age": 1000,
+    "calls": 4,
+    "source": "docs/listen.json"
   }
 ]
