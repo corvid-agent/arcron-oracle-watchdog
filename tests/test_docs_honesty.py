@@ -64,6 +64,11 @@ def test_pages_does_not_paint_localnet_as_testnet() -> None:
     assert "./deploy.json" in APP_JS
     assert "./localnet.json" in APP_JS
     assert "./listen.json" in APP_JS
+    assert "setNetworkMeta" in APP_JS
+    html = (ROOT / "docs" / "index.html").read_text()
+    assert 'id="network-meta"' in html
+    assert "LocalNet proof only" in html
+    assert "not on TestNet" in html
 
 
 def test_listen_json_is_localnet_not_testnet() -> None:
