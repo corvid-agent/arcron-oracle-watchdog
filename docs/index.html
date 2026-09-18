@@ -10,16 +10,30 @@
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
+  <div class="tape" aria-hidden="true">
+    <span>LOCALNET PROOF</span><span>NOT ON TESTNET</span><span>NO WALLET</span><span>PULL NOT PUSH</span><span>SKIP 81/87</span>
+    <span>LOCALNET PROOF</span><span>NOT ON TESTNET</span><span>NO WALLET</span><span>PULL NOT PUSH</span><span>SKIP 81/87</span>
+  </div>
   <main class="crt" id="crt">
     <header>
       <h1>Watchdog</h1>
-      <div class="meta" id="network-meta">LocalNet proof only · not on TestNet · unaudited · pull-not-push</div>
+      <div class="header-right">
+        <span class="net-badge localnet" id="network-badge" title="Painted from deploy.json appId">LOCALNET</span>
+        <div class="meta" id="network-meta">LocalNet proof only · not on TestNet · unaudited · pull-not-push</div>
+      </div>
     </header>
 
     <section class="status-row">
       <div class="label">Board</div>
       <div class="destination grounded" id="headline">NOT DEPLOYED</div>
       <div class="meta" id="subhead">not deployed · keeper 769891898</div>
+    </section>
+
+    <section class="method-legend" aria-label="Hook roles">
+      <div class="pill report"><span class="lamp"></span> REPORT <strong>interested party</strong></div>
+      <div class="pill watch"><span class="lamp"></span> WATCH <strong>account stale</strong></div>
+      <div class="pill keeper"><span class="lamp"></span> SET_KEEPER <strong>auth app</strong></div>
+      <div class="pill age"><span class="lamp"></span> MAX_AGE <strong>round budget</strong></div>
     </section>
 
     <section class="board">
@@ -63,6 +77,7 @@
     </section>
 
     <p class="meta" id="localnet-proof" hidden></p>
+    <p class="meta" id="keeper-live">Keeper live strip · seeking TestNet…</p>
     <p class="notes" id="notes">
       Read-only status board. No wallet. Live board is LocalNet-only until
       <code>docs/deploy.json</code> <code>appId</code> is a real TestNet create
@@ -72,8 +87,17 @@
       compiled in. Graphs paint LocalNet listen history when TestNet
       <code>appId</code> is 0 — never treat LocalNet ids as TestNet. Keeper
       <a href="https://testnet.explorer.perawallet.app/application/769891898">769891898</a>.
+      LocalNet proof in this commit: app <strong>1142</strong> / mock keeper <strong>1143</strong>
+      (see <code>docs/localnet.json</code> + <code>docs/listen.json</code>).
     </p>
     <p class="err" id="err" hidden></p>
+    <footer class="apron">
+      <span>TestNet <code>deploy.json</code> appId stays 0 until a real create</span>
+      <span>·</span>
+      <span>LocalNet ids are ephemeral — never explorer links</span>
+      <span>·</span>
+      <span>Skip upkeep 81 / 87</span>
+    </footer>
   </main>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.11.0/sql-wasm.js"></script>
   <script src="./app.js"></script>

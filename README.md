@@ -18,7 +18,7 @@ The keeper supplies no oracle data. Arcron `execute` inner-calls `watch()` with 
 | execute txid (keeper called `watch`) | **not done** |
 | report txid (interested party pulled) | **not done** |
 | keeper | [769891898](https://testnet.explorer.perawallet.app/application/769891898) live, frozen=0 |
-| Pages | https://corvid-agent.github.io/arcron-oracle-watchdog/ (publishes `docs/` from `main`) |
+| Pages | https://corvid-agent.github.io/arcron-oracle-watchdog/ (publishes `docs/` from `main`; CRT honesty tape/badge/keeper-live) |
 
 LocalNet proof for Pages lives in `docs/localnet.json` and `docs/listen.json` (CRT shows them when present). `docs/history.json` appends LocalNet listen samples for the phosphor staleness / last-report / watch-count graphs (in-page sql.js). `node scripts/append_history.mjs` appends from `listen.json` without touching `deploy.json`. `docs/deploy.json` stays honest TestNet `appId: 0`.
 
@@ -40,6 +40,8 @@ TestNet only. Throwaway account, public TestNet dispenser. No mnemonic in this r
 Create, `set_keeper(Application(...))`, `set_max_age`, an interested-party `report(value)`, and a mock-keeper inner-call of `watch()` were proven on AlgoKit LocalNet (`dockernet-v1`). That is **not** TestNet. Do **not** copy any LocalNet app id into `docs/deploy.json` or treat it as TestNet. TestNet `appId` stays 0 until a real TestNet create.
 
 This pass (2026-09-17 ~5:53 PM MT): `python scripts/localnet_recreate.py` created Watchdog **appId 1142** at confirmed round **112** (`createTxid` in `docs/localnet.json`). Then `python scripts/localnet_listen.py` created mock keeper **1143**, set_keeper, set_max_age(1000), interested-party `report(42)`, and inner-called `watch` (1 inner). Global after listen: last_value=42, stale=0, watch_count=1, last_watch_round=118. LocalNet last-round after listen: 118. Did not spend the TestNet bank. Did not poke upkeep 81 or 87. Prior LocalNet appIds 1103/1104 (and 1053/1054, 1001/1002, 1081/1082, 1014/1015, 1147/1148, 1108/1109) are superseded.
+
+CRT honesty pass (2026-09-18 ~5:50 PM MT): Pages board gets Arrivals-style tape, LOCALNET/TESTNET badge, method legend (report/watch/set_keeper/max_age), apron, and an unsigned TestNet keeper live strip (last-round / frozen / next_upkeep_id on 769891898). Still **not** TestNet — `docs/deploy.json` appId stays 0. Docker/LocalNet unavailable this run, so LocalNet proof remains app **1142** / mock **1143** from 2026-09-17.
 
 LocalNet ids are ephemeral (DevMode / reset). They are not a product. They are not TestNet explorer links.
 LocalNet proof for Pages lives in `docs/localnet.json` and `docs/listen.json` (CRT shows them when present). `docs/deploy.json` stays honest TestNet `appId: 0`.

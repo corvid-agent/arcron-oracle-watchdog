@@ -27,6 +27,49 @@ function paint(status, cls, title) {
 function setNetworkMeta(text) {
   const el = document.getElementById("network-meta");
   if (el) el.textContent = text;
+  const badge = document.getElementById("network-badge");
+  if (!badge) return;
+  const t = String(text || "").toLowerCase();
+  if (t.includes("unknown") || t.includes("do not assume")) {
+    badge.textContent = "UNKNOWN";
+    badge.className = "net-badge unknown";
+  } else if (t.includes("localnet") || t.includes("not on testnet")) {
+    badge.textContent = "LOCALNET";
+    badge.className = "net-badge localnet";
+  } else if (t.includes("testnet")) {
+    badge.textContent = "TESTNET";
+    badge.className = "net-badge testnet";
+  } else {
+    badge.textContent = "UNKNOWN";
+    badge.className = "net-badge unknown";
+  }
+}
+
+async function loadKeeperLive(keeperAppId) {
+  const el = document.getElementById("keeper-live");
+  if (!el) return;
+  const kid = Number(keeperAppId) || KEEPER;
+  try {
+    const [stRes, appRes] = await Promise.all([
+      fetch("https://testnet-api.algonode.cloud/v2/status"),
+      fetch("https://testnet-api.algonode.cloud/v2/applications/" + kid),
+    ]);
+    if (!stRes.ok || !appRes.ok) throw new Error("algod " + stRes.status + "/" + appRes.status);
+    const st = await stRes.json();
+    const app = await appRes.json();
+    const round = st["last-round"];
+    const g = (app.params && app.params["global-state"]) || [];
+    const frozen = readGlobal(g, "frozen");
+    const nextId = readGlobal(g, "next_upkeep_id");
+    el.textContent =
+      "TestNet keeper " + kid +
+      " · last-round " + round +
+      " · frozen=" + (frozen == null ? "?" : frozen) +
+      " · next_upkeep_id=" + (nextId == null ? "?" : nextId) +
+      " · unsigned read · not this app";
+  } catch (e) {
+    el.textContent = "Keeper live strip · TestNet unsigned read failed (board still LocalNet-only)";
+  }
 }
 
 function b64utf8(b64) {
@@ -472,13 +515,15 @@ async function main() {
   if (appId <= 0) {
     paint("NOT DEPLOYED", "grounded", "WATCHDOG — NOT DEPLOYED");
     setNetworkMeta("LocalNet proof only · not on TestNet · unaudited · pull-not-push");
-    subhead.textContent = "not deployed · keeper " + keeper + " · LocalNet only";
+    subhead.textContent = "not deployed · keeper " + keeper + " · LocalNet only · proof app 1142";
     await loadLocalnetProof();
+    await loadKeeperLive(keeper);
     return;
   }
 
   setNetworkMeta("TestNet · unaudited · pull-not-push");
   subhead.textContent = "app " + appId + " · upkeep " + (cfg.upkeepId || "—") + " · " + (cfg.network || "testnet");
+  await loadKeeperLive(keeper);
   try {
     const res = await fetch(INDEXER + "/v2/applications/" + appId);
     if (!res.ok) throw new Error("indexer " + res.status);
