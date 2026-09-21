@@ -20,7 +20,21 @@ The keeper supplies no oracle data. Arcron `execute` inner-calls `watch()` with 
 | keeper | [769891898](https://testnet.explorer.perawallet.app/application/769891898) live, frozen=0 |
 | Pages | https://corvid-agent.github.io/arcron-oracle-watchdog/ (publishes `docs/` from `main`; CRT honesty tape/badge/keeper-live) |
 
-LocalNet proof for Pages lives in `docs/localnet.json` and `docs/listen.json` (CRT shows them when present). `docs/history.json` appends LocalNet listen samples for the phosphor staleness / last-report / watch-count graphs (in-page sql.js). `node scripts/append_history.mjs` appends from `listen.json` without touching `deploy.json`. `docs/deploy.json` stays honest TestNet `appId: 0`.
+LocalNet proof for Pages lives in `docs/localnet.json` and `docs/listen.json` (CRT shows them when present). `docs/history.json` appends LocalNet listen samples for the phosphor staleness / last-report / watch-count graphs (in-page sql.js). `node scripts/append_history.mjs` appends from `listen.json` without touching `deploy.json`. `docs/due.json` is an unsigned TestNet keeper probe when LocalNet is down. `docs/deploy.json` stays honest TestNet `appId: 0`.
+
+
+### Unsigned keeper probe (`docs/due.json`)
+
+When dockerd/LocalNet is down and TestNet watchdog is still `appId` 0, CoS refreshes
+an **unsigned** TestNet read of Arcron keeper `769891898` into `docs/due.json`
+(algod + indexer: lastRound, frozen, next_upkeep_id, keeper balance). This does
+**not** create a watchdog app, does **not** register an upkeep, and never copies
+LocalNet ids 1142/1143 into `deploy.json`. Skip upkeep 81 and 87.
+
+This pass (2026-09-21 ~5:56 PM MT): dockerd down → no LocalNet recreate. Wrote
+`docs/due.json` from live TestNet reads (keeper thawed, `watchdogAppId`/`watchdogUpkeepId`
+stay 0, lastRound captured in due.json). CRT tape/apron/subhead sync to LocalNet
+proof **app 1142** / mock **1143** and the undeployed badge stays **LOCALNET** (not TestNet).
 
 ## How to run
 
