@@ -31,10 +31,11 @@ an **unsigned** TestNet read of Arcron keeper `769891898` into `docs/due.json`
 **not** create a watchdog app, does **not** register an upkeep, and never copies
 LocalNet ids 1142/1143 into `deploy.json`. Skip upkeep 81 and 87.
 
-This pass (2026-09-21 ~5:56 PM MT): dockerd down → no LocalNet recreate. Wrote
-`docs/due.json` from live TestNet reads (keeper thawed, `watchdogAppId`/`watchdogUpkeepId`
-stay 0, lastRound captured in due.json). CRT tape/apron/subhead sync to LocalNet
-proof **app 1142** / mock **1143** and the undeployed badge stays **LOCALNET** (not TestNet).
+This pass (2026-09-23 ~10:23 AM MT): dockerd down → no LocalNet recreate. Refreshed
+`docs/due.json` from live unsigned TestNet reads (keeper 769891898 thawed/frozen=0,
+`nextUpkeepId` 121, `watchdogAppId`/`watchdogUpkeepId` stay 0, lastRound in due.json).
+CRT still shows LocalNet proof **app 1142** / mock **1143**; badge stays **LOCALNET**.
+Skip upkeep 81 and 87. Did not spend TestNet bank.
 
 ## How to run
 
