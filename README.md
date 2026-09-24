@@ -31,11 +31,12 @@ an **unsigned** TestNet read of Arcron keeper `769891898` into `docs/due.json`
 **not** create a watchdog app, does **not** register an upkeep, and never copies
 LocalNet ids 1142/1143 into `deploy.json`. Skip upkeep 81 and 87.
 
-This pass (2026-09-23 ~10:23 AM MT): dockerd down → no LocalNet recreate. Refreshed
-`docs/due.json` from live unsigned TestNet reads (keeper 769891898 thawed/frozen=0,
-`nextUpkeepId` 121, `watchdogAppId`/`watchdogUpkeepId` stay 0, lastRound in due.json).
-CRT still shows LocalNet proof **app 1142** / mock **1143**; badge stays **LOCALNET**.
-Skip upkeep 81 and 87. Did not spend TestNet bank.
+This pass (2026-09-24 ~9:49 AM MT): dockerd down → no LocalNet recreate. Added
+`scripts/probe_keeper.py` and refreshed `docs/due.json` from live unsigned TestNet
+reads (keeper 769891898 thawed/frozen=0, `nextUpkeepId` 121, `watchdogAppId`/
+`watchdogUpkeepId` stay 0, lastRound in due.json). CRT still shows LocalNet proof
+**app 1142** / mock **1143**; badge stays **LOCALNET**. Skip upkeep 81 and 87.
+Did not spend TestNet bank.
 
 ## How to run
 
